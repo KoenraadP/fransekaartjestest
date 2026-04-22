@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <title>Franse Draaikaartjes</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            text-align: center;
+            margin: 0;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        h1 {
+            margin-top: 30px;
+            font-size: 2.5rem;
+        }
+
+        #cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            padding: 40px;
+            max-width: 1000px;
+            margin: auto;
+        }
+
+        .card {
+            perspective: 1000px;
+        }
+
+        .inner {
+            position: relative;
+            width: 100%;
+            height: 160px;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+
+        .card:hover .inner {
+            transform: rotateY(180deg) scale(1.05);
+        }
+
+        .front, .back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+
+        .front {
+            background: linear-gradient(135deg, #43cea2, #185a9d);
+        }
+
+        .back {
+            transform: rotateY(180deg);
+            flex-direction: column;
+            background: linear-gradient(135deg, #ff9966, #ff5e62);
+        }
+
+        button {
+            margin-top: 15px;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 8px;
+            background: white;
+            color: #333;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        p {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+
+<h1>🇫🇷 Franse Draaikaartjes</h1>
+<p>Hover over een kaartje om het om te draaien</p>
+
+<div id="cards">
+
+    <div class="card">
+        <div class="inner">
+            <div class="front">huis</div>
+            <div class="back">
+                maison
+                <button onclick="speechSynthesis.speak(new SpeechSynthesisUtterance('maison'))">🔊 Luister</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="inner">
+            <div class="front">boek</div>
+            <div class="back">
+                livre
+                <button onclick="speechSynthesis.speak(new SpeechSynthesisUtterance('livre'))">🔊 Luister</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="inner">
+            <div class="front">water</div>
+            <div class="back">
+                eau
+                <button onclick="speechSynthesis.speak(new SpeechSynthesisUtterance('eau'))">🔊 Luister</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="inner">
+            <div class="front">eten</div>
+            <div class="back">
+                manger
+                <button onclick="speechSynthesis.speak(new SpeechSynthesisUtterance('manger'))">🔊 Luister</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="inner">
+            <div class="front">school</div>
+            <div class="back">
+                école
+                <button onclick="speechSynthesis.speak(new SpeechSynthesisUtterance('école'))">🔊 Luister</button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>
