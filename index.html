@@ -14,8 +14,12 @@
         }
 
         h1 {
-            margin-top: 30px;
+            margin-top: 20px;
             font-size: 2.5rem;
+        }
+
+        #game {
+            margin: 20px;
         }
 
         #cards {
@@ -39,8 +43,8 @@
             transform-style: preserve-3d;
         }
 
-        .card:hover .inner {
-            transform: rotateY(180deg) scale(1.05);
+        .card.flip .inner {
+            transform: rotateY(180deg);
         }
 
         .front, .back {
@@ -58,6 +62,7 @@
 
         .front {
             background: linear-gradient(135deg, #43cea2, #185a9d);
+            flex-direction: column;
         }
 
         .back {
@@ -66,80 +71,148 @@
             background: linear-gradient(135deg, #ff9966, #ff5e62);
         }
 
-        button {
-            margin-top: 15px;
-            padding: 8px 15px;
-            border: none;
+        button, input {
+            margin-top: 10px;
+            padding: 8px;
             border-radius: 8px;
-            background: white;
-            color: #333;
-            font-weight: bold;
-            cursor: pointer;
+            border: none;
         }
 
-        p {
-            opacity: 0.9;
+        #score {
+            font-size: 1.2rem;
+            margin-top: 10px;
         }
+
+        .correct { background: #4CAF50 !important; }
+        .wrong { background: #e74c3c !important; }
+
+        .controls { margin-top: 10px; }
     </style>
 </head>
 <body>
 
-<h1>Franse Draaikaartjes</h1>
-<p>Hover over een kaartje om het om te draaien</p>
+<h1>🇫🇷 Franse Draaikaartjes</h1>
+<p>Raad eerst het Franse woord en klik dan op controleren!</p>
 
-<div id="cards">
-
-    <div class="card">
-        <div class="inner">
-            <div class="front">huis</div>
-            <div class="back">
-                maison
-                <button onclick="speechSynthesis.speak(new SpeechSynthesisUtterance('maison'))">🔊 Luister</button>
-            </div>
-        </div>
+<div id="game">
+    <div>Score: <span id="score">0</span> / 5</div>
+    <div class="controls">
+        <button id="resetBtn">Reset score</button>
     </div>
-
-    <div class="card">
-        <div class="inner">
-            <div class="front">boek</div>
-            <div class="back">
-                livre
-                <button onclick="speechSynthesis.speak(new SpeechSynthesisUtterance('livre'))">🔊 Luister</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="card">
-        <div class="inner">
-            <div class="front">water</div>
-            <div class="back">
-                eau
-                <button onclick="speechSynthesis.speak(new SpeechSynthesisUtterance('eau'))">🔊 Luister</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="card">
-        <div class="inner">
-            <div class="front">eten</div>
-            <div class="back">
-                manger
-                <button onclick="speechSynthesis.speak(new SpeechSynthesisUtterance('manger'))">🔊 Luister</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="card">
-        <div class="inner">
-            <div class="front">school</div>
-            <div class="back">
-                école
-                <button onclick="speechSynthesis.speak(new SpeechSynthesisUtterance('école'))">🔊 Luister</button>
-            </div>
-        </div>
-    </div>
-
 </div>
+
+<div id="cards"></div>
+
+<script>
+const woorden = [
+    { nl: "huis", fr: "maison" },
+    { nl: "boek", fr: "livre" },
+    { nl: "water", fr: "eau" },
+    { nl: "eten", fr: "manger" },
+    { nl: "school", fr: "école" }
+];
+
+// --- Persistente score met localStorage ---
+const STORAGE_KEY = 'fr_flashcards_score_v1';
+
+function loadScore() {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    return saved ? parseInt(saved, 10) : 0;
+}
+
+function saveScore(value) {
+    localStorage.setItem(STORAGE_KEY, String(value));
+}
+
+let score = loadScore();
+
+const container = document.getElementById("cards");
+const scoreEl = document.getElementById("score");
+const resetBtn = document.getElementById('resetBtn');
+
+scoreEl.textContent = score;
+
+resetBtn.onclick = () => {
+    score = 0;
+    saveScore(score);
+    scoreEl.textContent = score;
+    // visuele reset (optioneel)
+    document.querySelectorAll('.card').forEach(c => {
+        c.classList.remove('correct','wrong','flip');
+        const input = c.querySelector('input');
+        if (input) input.value = '';
+        c.dataset.answered = 'false';
+    });
+};
+
+woorden.forEach((w, index) => {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.dataset.answered = 'false'; // voorkom dubbel tellen
+
+    const inner = document.createElement("div");
+    inner.className = "inner";
+
+    const front = document.createElement("div");
+    front.className = "front";
+    front.textContent = w.nl;
+
+    const back = document.createElement("div");
+    back.className = "back";
+
+    const frWord = document.createElement("div");
+    frWord.textContent = w.fr;
+
+    const input = document.createElement("input");
+    input.placeholder = "Typ Frans woord";
+
+    const checkBtn = document.createElement("button");
+    checkBtn.textContent = "Check";
+
+    checkBtn.onclick = (e) => {
+        e.stopPropagation();
+
+        // al beantwoord? dan niets meer doen
+        if (card.dataset.answered === 'true') {
+            card.classList.add('flip');
+            return;
+        }
+
+        if (input.value.toLowerCase().trim() === w.fr) {
+            card.classList.add("correct");
+            score++;
+            saveScore(score);
+            scoreEl.textContent = score;
+        } else {
+            card.classList.add("wrong");
+        }
+
+        card.dataset.answered = 'true';
+        card.classList.add("flip");
+    };
+
+    const speakBtn = document.createElement("button");
+    speakBtn.textContent = "🔊";
+    speakBtn.onclick = (e) => {
+        e.stopPropagation();
+        const u = new SpeechSynthesisUtterance(w.fr);
+        u.lang = "fr-FR";
+        speechSynthesis.speak(u);
+    };
+
+    back.appendChild(frWord);
+    back.appendChild(speakBtn);
+
+    front.appendChild(document.createElement("br"));
+    front.appendChild(input);
+    front.appendChild(checkBtn);
+
+    inner.appendChild(front);
+    inner.appendChild(back);
+    card.appendChild(inner);
+    container.appendChild(card);
+});
+</script>
 
 </body>
 </html>
